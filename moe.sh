@@ -23,7 +23,6 @@ if [[ $# -ne 2 || $1 != "--variant" || ! " ${VARIANTS[@]} " =~ " $2 " ]]; then
     exit 1
 fi
 
-# Determina a variante e o defconfig correspondente
 VARIANT="$2"
 if [[ "$VARIANT" == "fts" ]]; then
     DEFCONFIG="${DEFCONFIGS[0]}"
