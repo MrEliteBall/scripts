@@ -18,6 +18,19 @@ VARIANTS=("fts" "gdx")
 DEFCONFIGS=("vendor/bangkk_fts_defconfig" "vendor/bangkk_gdx_defconfig")
 ZIPNAME_PREFIX="MoeKernel-$(date '+%Y%m%d-%H%M')"
 
+if [[ $# -ne 2 || $1 != "--variant" || ! " ${VARIANTS[@]} " =~ " $2 " ]]; then
+    echo "Uso: $0 --variant {fts|gdx}"
+    exit 1
+fi
+
+# Determina a variante e o defconfig correspondente
+VARIANT="$2"
+if [[ "$VARIANT" == "fts" ]]; then
+    DEFCONFIG="${DEFCONFIGS[0]}"
+elif [[ "$VARIANT" == "gdx" ]]; then
+    DEFCONFIG="${DEFCONFIGS[1]}"
+fi
+
 if ! [ -d "${TC_DIR}" ]; then
     echo "Clang not found! Cloning to ${TC_DIR}..."
     if ! git clone --depth=1 https://gitlab.com/moehacker/clang-r487747.git ${TC_DIR}; then
@@ -26,80 +39,57 @@ if ! [ -d "${TC_DIR}" ]; then
     fi
 fi
 
-for i in "${!DEFCONFIGS[@]}"; do
-    DEFCONFIG="${DEFCONFIGS[$i]}"
-    VARIANT="${VARIANTS[$i]}"
-    echo -e "\nCompiling for $DEFCONFIG with variant $VARIANT..."
+echo -e "\nCompiling for $DEFCONFIG with variant $VARIANT..."
 
-    if [[ $1 = "-m" || $1 = "--menu" ]]; then
-        mkdir -p out
-        make O=out ARCH=arm64 $DEFCONFIG menuconfig
-    elif [[ $1 = "menu" ]]; then
-        mkdir -p out
-        make O=out ARCH=arm64 $DEFCONFIG menuconfig
-    else
-        mkdir -p out
-        make O=out ARCH=arm64 $DEFCONFIG
-    fi
+mkdir -p out
+make O=out ARCH=arm64 $DEFCONFIG
 
-    ARGS='
-    CC=clang
-    LD='${LLVM_DIR}/ld.lld'
-    ARCH=arm64
-    AR='${LLVM_DIR}/llvm-ar'
-    NM='${LLVM_DIR}/llvm-nm'
-    AS='${LLVM_DIR}/llvm-as'
-    OBJCOPY='${LLVM_DIR}/llvm-objcopy'
-    OBJDUMP='${LLVM_DIR}/llvm-objdump'
-    READELF='${LLVM_DIR}/llvm-readelf'
-    OBJSIZE='${LLVM_DIR}/llvm-size'
-    STRIP='${LLVM_DIR}/llvm-strip'
-    LLVM_AR='${LLVM_DIR}/llvm-ar'
-    LLVM_DIS='${LLVM_DIR}/llvm-dis'
-    LLVM_NM='${LLVM_DIR}/llvm-nm'
-    LLVM=1
-    '
+ARGS='
+CC=clang
+LD='${LLVM_DIR}/ld.lld'
+ARCH=arm64
+AR='${LLVM_DIR}/llvm-ar'
+NM='${LLVM_DIR}/llvm-nm'
+AS='${LLVM_DIR}/llvm-as'
+OBJCOPY='${LLVM_DIR}/llvm-objcopy'
+OBJDUMP='${LLVM_DIR}/llvm-objdump'
+READELF='${LLVM_DIR}/llvm-readelf'
+OBJSIZE='${LLVM_DIR}/llvm-size'
+STRIP='${LLVM_DIR}/llvm-strip'
+LLVM_AR='${LLVM_DIR}/llvm-ar'
+LLVM_DIS='${LLVM_DIR}/llvm-dis'
+LLVM_NM='${LLVM_DIR}/llvm-nm'
+LLVM=1
+'
 
-    if [[ $1 = "-r" || $1 = "--regen" ]]; then
-        make $ARGS $DEFCONFIG savedefconfig
-        cp .config arch/arm64/configs/$DEFCONFIG
-        echo -e "\nSuccessfully regenerated defconfig at $DEFCONFIG"
-        exit
-    fi
+make ${ARGS} O=out -j$(nproc)
 
-    make ${ARGS} O=out $DEFCONFIG moto.config
-    make ${ARGS} O=out -j$(nproc)
-
-    [ ! -e "out/arch/arm64/boot/Image" ] && \
-    echo "  ERROR : image binary not found in any of the specified locations , fix compile!" && \
+if [ ! -e "out/arch/arm64/boot/Image" ]; then
+    echo "ERROR: Image binary not found. Compilation failed!"
     exit 1
+fi
 
-    echo -e "\nKernel compiled successfully for $DEFCONFIG! Zipping up...\n"
+echo -e "\nKernel compiled successfully for $DEFCONFIG! Zipping up...\n"
 
-    if [ -d "$AK3_DIR" ]; then
-        cp -r $AK3_DIR AnyKernel3
-        git -C AnyKernel3 checkout bangkk &> /dev/null
-    elif ! git clone -q https://github.com/MoeKernel/AnyKernel3 -b inline; then
-        echo -e "\nAnyKernel3 repo not found locally and couldn't clone from GitHub! Aborting..."
-        exit 1
-    fi
+if [ -d "$AK3_DIR" ]; then
+    cp -r $AK3_DIR AnyKernel3
+    git -C AnyKernel3 checkout bangkk &> /dev/null
+else
+    git clone -q https://github.com/MoeKernel/AnyKernel3 -b inline
+fi
 
-    kver=$(make kernelversion)
-    kmod=$(echo ${kver} | awk -F'.' '{print $3}')
+cp out/.config AnyKernel3/config
+cp out/arch/arm64/boot/Image AnyKernel3/Image
+cp out/arch/arm64/boot/dtb.img AnyKernel3/dtb
+cp out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
 
-    cp out/.config AnyKernel3/config
-    cp out/arch/arm64/boot/Image AnyKernel3/Image
-    cp out/arch/arm64/boot/dtb.img AnyKernel3/dtb
-    cp out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
+ZIPNAME="${ZIPNAME_PREFIX}-${VARIANT}.zip"
+cd AnyKernel3
+zip -r9 "../$ZIPNAME" * -x .git README.md *placeholder
+cd ..
 
-    ZIPNAME="${ZIPNAME_PREFIX}-${VARIANT}.zip"
-    cd AnyKernel3
-    zip -r9 "../$ZIPNAME" * -x .git README.md *placeholder
-    cd ..
-
-    echo -e "\nCompleted compilation for $DEFCONFIG (variant $VARIANT) in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s)!"
-    echo "Zip: $ZIPNAME"
-    rm -rf AnyKernel3
-done
+echo -e "\nCompleted compilation for $DEFCONFIG (variant $VARIANT) in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s)!"
+echo "Zip: $ZIPNAME"
+rm -rf AnyKernel3
 
 echo -e "\nAll compilations finished!"
