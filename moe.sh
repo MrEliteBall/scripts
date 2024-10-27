@@ -7,7 +7,6 @@ SECONDS=0
 CLANG_VERSION="clang-17.0.0"
 TC_DIR="$HOME/tc/$CLANG_VERSION"
 PATH=$HOME/tc/$CLANG_VERSION/bin:$PATH
-#export modpath=AnyKernel3/modules/vendor/lib/modules
 export ARCH=arm64
 export KBUILD_BUILD_USER=Moe
 export KBUILD_BUILD_HOST=Nyan
@@ -15,8 +14,9 @@ export LLVM_DIR=$HOME/tc/$CLANG_VERSION/bin
 export LLVM=1
 
 AK3_DIR="$HOME/AnyKernel3"
-DEFCONFIG="vendor/bangkk_defconfig"
-ZIPNAME="MoeKernel-bangkk-$(date '+%Y%m%d-%H%M').zip"
+VARIANTS=("fts" "gdx")
+DEFCONFIGS=("vendor/bangkk_fts_defconfig" "vendor/bangkk_gdx_defconfig")
+ZIPNAME_PREFIX="MoeKernel-$(date '+%Y%m%d-%H%M')"
 
 if ! [ -d "${TC_DIR}" ]; then
     echo "Clang not found! Cloning to ${TC_DIR}..."
@@ -26,74 +26,80 @@ if ! [ -d "${TC_DIR}" ]; then
     fi
 fi
 
-if [[ $1 = "-m" || $1 = "--menu" ]]; then
-    mkdir -p out
-    make O=out ARCH=arm64 $DEFCONFIG menuconfig
-elif [[ $1 = "menu" ]]; then
-    mkdir -p out
-    make O=out ARCH=arm64 $DEFCONFIG menuconfig
-else
-    mkdir -p out
-    make O=out ARCH=arm64 $DEFCONFIG
-fi
+for i in "${!DEFCONFIGS[@]}"; do
+    DEFCONFIG="${DEFCONFIGS[$i]}"
+    VARIANT="${VARIANTS[$i]}"
+    echo -e "\nCompiling for $DEFCONFIG with variant $VARIANT..."
 
-ARGS='
-CC=clang
-LD='${LLVM_DIR}/ld.lld'
-ARCH=arm64
-AR='${LLVM_DIR}/llvm-ar'
-NM='${LLVM_DIR}/llvm-nm'
-AS='${LLVM_DIR}/llvm-as'
-OBJCOPY='${LLVM_DIR}/llvm-objcopy'
-OBJDUMP='${LLVM_DIR}/llvm-objdump'
-READELF='${LLVM_DIR}/llvm-readelf'
-OBJSIZE='${LLVM_DIR}/llvm-size'
-STRIP='${LLVM_DIR}/llvm-strip'
-LLVM_AR='${LLVM_DIR}/llvm-ar'
-LLVM_DIS='${LLVM_DIR}/llvm-dis'
-LLVM_NM='${LLVM_DIR}/llvm-nm'
-LLVM=1
-'
+    if [[ $1 = "-m" || $1 = "--menu" ]]; then
+        mkdir -p out
+        make O=out ARCH=arm64 $DEFCONFIG menuconfig
+    elif [[ $1 = "menu" ]]; then
+        mkdir -p out
+        make O=out ARCH=arm64 $DEFCONFIG menuconfig
+    else
+        mkdir -p out
+        make O=out ARCH=arm64 $DEFCONFIG
+    fi
 
-if [[ $1 = "-r" || $1 = "--regen" ]]; then
-	make $ARGS $DEFCONFIG savedefconfig
-	cp .config arch/arm64/configs/$DEFCONFIG
-	echo -e "\nSuccessfully regenerated defconfig at $DEFCONFIG"
-	exit
-fi
+    ARGS='
+    CC=clang
+    LD='${LLVM_DIR}/ld.lld'
+    ARCH=arm64
+    AR='${LLVM_DIR}/llvm-ar'
+    NM='${LLVM_DIR}/llvm-nm'
+    AS='${LLVM_DIR}/llvm-as'
+    OBJCOPY='${LLVM_DIR}/llvm-objcopy'
+    OBJDUMP='${LLVM_DIR}/llvm-objdump'
+    READELF='${LLVM_DIR}/llvm-readelf'
+    OBJSIZE='${LLVM_DIR}/llvm-size'
+    STRIP='${LLVM_DIR}/llvm-strip'
+    LLVM_AR='${LLVM_DIR}/llvm-ar'
+    LLVM_DIS='${LLVM_DIR}/llvm-dis'
+    LLVM_NM='${LLVM_DIR}/llvm-nm'
+    LLVM=1
+    '
 
-make ${ARGS} O=out $DEFCONFIG moto.config
-make ${ARGS} O=out -j$(nproc)
+    if [[ $1 = "-r" || $1 = "--regen" ]]; then
+        make $ARGS $DEFCONFIG savedefconfig
+        cp .config arch/arm64/configs/$DEFCONFIG
+        echo -e "\nSuccessfully regenerated defconfig at $DEFCONFIG"
+        exit
+    fi
 
-[ ! -e "out/arch/arm64/boot/Image" ] && \
-echo "  ERROR : image binary not found in any of the specified locations , fix compile!" && \
-exit 1
+    make ${ARGS} O=out $DEFCONFIG moto.config
+    make ${ARGS} O=out -j$(nproc)
 
-echo -e "\nKernel compiled succesfully! Zipping up...\n"
+    [ ! -e "out/arch/arm64/boot/Image" ] && \
+    echo "  ERROR : image binary not found in any of the specified locations , fix compile!" && \
+    exit 1
 
-if [ -d "$AK3_DIR" ]; then
-	cp -r $AK3_DIR AnyKernel3
-	git -C AnyKernel3 checkout bangkk &> /dev/null
-elif ! git clone -q https://github.com/MoeKernel/AnyKernel3 -b inline; then
-	echo -e "\nAnyKernel3 repo not found locally and couldn't clone from GitHub! Aborting..."
-	exit 1
-fi
+    echo -e "\nKernel compiled successfully for $DEFCONFIG! Zipping up...\n"
 
-#mkdir -p ${modpath}
-kver=$(make kernelversion)
-kmod=$(echo ${kver} | awk -F'.' '{print $3}')
-#mkdir -p AnyKernel3/modules/vendor/lib/modules
-kver=$(make kernelversion)
-kmod=$(echo ${kver} | awk -F'.' '{print $3}')
+    if [ -d "$AK3_DIR" ]; then
+        cp -r $AK3_DIR AnyKernel3
+        git -C AnyKernel3 checkout bangkk &> /dev/null
+    elif ! git clone -q https://github.com/MoeKernel/AnyKernel3 -b inline; then
+        echo -e "\nAnyKernel3 repo not found locally and couldn't clone from GitHub! Aborting..."
+        exit 1
+    fi
 
-cp out/.config AnyKernel3/config
-cp out/arch/arm64/boot/Image AnyKernel3/Image
-cp out/arch/arm64/boot/dtb.img AnyKernel3/dtb
-cp out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
+    kver=$(make kernelversion)
+    kmod=$(echo ${kver} | awk -F'.' '{print $3}')
 
-cd AnyKernel3
-zip -r9 "../$ZIPNAME" * -x .git README.md *placeholder
-cd ..
-echo -e "\nCompleted in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s) !"
-echo "Zip: $ZIPNAME"
-rm -rf AnyKernel3
+    cp out/.config AnyKernel3/config
+    cp out/arch/arm64/boot/Image AnyKernel3/Image
+    cp out/arch/arm64/boot/dtb.img AnyKernel3/dtb
+    cp out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
+
+    ZIPNAME="${ZIPNAME_PREFIX}-${VARIANT}.zip"
+    cd AnyKernel3
+    zip -r9 "../$ZIPNAME" * -x .git README.md *placeholder
+    cd ..
+
+    echo -e "\nCompleted compilation for $DEFCONFIG (variant $VARIANT) in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s)!"
+    echo "Zip: $ZIPNAME"
+    rm -rf AnyKernel3
+done
+
+echo -e "\nAll compilations finished!"
