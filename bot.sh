@@ -42,7 +42,7 @@ start_message=$(curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMess
 
 start_time=$(date +%s)
 
-./ksu_update.sh
+#./ksu_update.sh
 ./moe.sh --variant fts
 
 if [[ $? -eq 0 ]]; then
