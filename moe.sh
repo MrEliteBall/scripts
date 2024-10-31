@@ -77,9 +77,9 @@ echo -e "\nKernel compiled successfully for $DEFCONFIG! Zipping up...\n" | tee -
 
 if [ -d "$AK3_DIR" ]; then
     cp -r $AK3_DIR AnyKernel3
-    git -C AnyKernel3 checkout bangkk &> /dev/null
+    git -C AnyKernel3 checkout susfs &> /dev/null
 else
-    git clone -q https://github.com/MoeKernel/AnyKernel3 -b nfc
+    git clone -q https://github.com/MoeKernel/AnyKernel3 -b susfs
 fi
 
 cp out/.config AnyKernel3/config
