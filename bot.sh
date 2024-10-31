@@ -91,6 +91,15 @@ EOF
 EOF
 )
 
+    log_file=$(ls *moe.log | head -n 1)
+    if [[ -n "$log_file" ]]; then
+        curl -s -F chat_id=$CHAT_ID \
+            -F document=@"$log_file" \
+            -F caption="MoeLog Nyan!" \
+            -F parse_mode="Markdown" \
+            "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+    fi
+
 	zip_file=$(ls *.zip | head -n 1)
     if [[ -n "$zip_file" ]]; then
 		caption=$(cat <<EOF
