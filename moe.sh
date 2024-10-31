@@ -19,12 +19,10 @@ VARIANTS=("fts" "gdx")
 DEFCONFIGS=("vendor/bangkk_fts_defconfig" "vendor/bangkk_gdx_defconfig")
 ZIPNAME_PREFIX="MoeKernel-$(date '+%Y%m%d-%H%M')"
 LOG_FILE="moe.log"
-
-# Limpa o arquivo de log antes de iniciar a compilação
 : > "$LOG_FILE"
 
 if [[ $# -ne 2 || $1 != "--variant" || ! " ${VARIANTS[@]} " =~ " $2 " ]]; then
-    echo "Uso: $0 --variant {fts|gdx}" | tee -a "$LOG_FILE"
+    echo "Use: $0 --variant {fts|gdx}" | tee -a "$LOG_FILE"
     exit 1
 fi
 
