@@ -19,11 +19,6 @@ VARIANTS=("fts" "gdx")
 DEFCONFIGS=("vendor/bangkk_fts_defconfig" "vendor/bangkk_gdx_defconfig")
 ZIPNAME_PREFIX="MoeKernel-$(date '+%Y%m%d-%H%M')"
 
-KSUVER="11985"
-if [ ! -d "KernelSU" ]; then
-  git clone https://github.com/whyakari/KernelSU -b $KSUVER
-fi
-
 if [[ $# -ne 2 || $1 != "--variant" || ! " ${VARIANTS[@]} " =~ " $2 " ]]; then
     echo "Uso: $0 --variant {fts|gdx}"
     exit 1
