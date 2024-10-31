@@ -17,7 +17,7 @@ export LLVM=1
 AK3_DIR="$HOME/AnyKernel3"
 VARIANTS=("fts" "gdx")
 DEFCONFIGS=("vendor/bangkk_fts_defconfig" "vendor/bangkk_gdx_defconfig")
-ZIPNAME_PREFIX="MoeKernel-$(date '+%Y%m%d-%H%M')"
+ZIPNAME_PREFIX="MoeKernel-moefs-$(date '+%Y%m%d-%H%M')"
 LOG_FILE="moe.log"
 : > "$LOG_FILE"
 
