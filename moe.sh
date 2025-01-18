@@ -14,12 +14,6 @@ export KBUILD_BUILD_HOST=Nyan
 export LLVM_DIR=$HOME/tc/$CLANG_VERSION/bin
 export LLVM=1
 
-## support ccache.
-export PATH="/usr/lib/ccache:$PATH"
-mkdir -p ~/.ccache
-echo 'max_size = 50G' > ~/.ccache/ccache.conf
-ccache --set-config=compiler_check=content
-
 AK3_DIR="$HOME/AnyKernel3"
 VARIANTS=("fts" "gdx")
 DEFCONFIGS=("vendor/bangkk_fts_defconfig" "vendor/bangkk_gdx_defconfig")
@@ -53,7 +47,7 @@ mkdir -p out
 make O=out ARCH=arm64 $DEFCONFIG | tee -a "$LOG_FILE"
 
 ARGS='
-CC=ccache clang
+CC=clang
 LD='${LLVM_DIR}/ld.lld'
 ARCH=arm64
 AR='${LLVM_DIR}/llvm-ar'
