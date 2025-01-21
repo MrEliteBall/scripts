@@ -1,7 +1,7 @@
 #!/bin/bash
 
-BASE_CONFIG="vendor/bangkk_gdx_defconfig"
-FRAGMENT_CONFIG="vendor/bangkk_fts_defconfig"
+BASE_CONFIG="arch/arm64/configs/vendor/bangkk_gdx_defconfig"
+FRAGMENT_CONFIG="arch/arm64/configsvendor/bangkk_fts_defconfig"
 OUTPUT_CONFIG="arch/arm64/configs/bangkk_merged_defconfig"
 
 echo "Merging $BASE_CONFIG and $FRAGMENT_CONFIG..."
