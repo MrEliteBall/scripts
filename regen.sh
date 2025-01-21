@@ -14,7 +14,8 @@ echo "Saving new defconfig as $OUTPUT_CONFIG..."
 mv defconfig $OUTPUT_CONFIG
 
 echo "Uploading $OUTPUT_CONFIG to temp.sh..."
-UPLOAD_URL=$(curl -s -F "file=@$OUTPUT_CONFIG" https://temp.sh/upload)
+UPLOAD_URL=$(curl -T $OUTPUT_CONFIG https://oshi.at)
+
 
 if [[ $? -eq 0 ]]; then
     echo "Upload successful! File available at: $UPLOAD_URL"
