@@ -42,8 +42,7 @@ start_message=$(curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMess
 
 start_time=$(date +%s)
 
-#./ksu_update.sh
-./moe.sh --variant gdx
+./moe.sh --variant bangkk
 
 if [[ $? -eq 0 ]]; then
     commit_head=$(git log --oneline -1 --pretty=format:'%h - %an')
@@ -82,12 +81,12 @@ EOF
     build_info=$(cat <<EOF
 *bangkk build (#${build_count}) has succeeded*
 *Kernel Version*: ${kernel_version}
-*Build Type*: \`${build_type}\` *(KSU/Fifteen/gdx)*
+*Build Type*: \`${build_type}\` *(SuSFS/KSU/Fifteen)*
 *Tag*: \`${tag}\`
 
 *Duration*: ${elapsed_minutes} Minutes ${elapsed_seconds} Seconds
 
-@MoeKernel #bangkk #ksu
+@MoeKernel #bangkk #ksu #susfs
 EOF
 )
 
