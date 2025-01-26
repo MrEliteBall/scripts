@@ -15,8 +15,8 @@ export LLVM_DIR=$HOME/tc/$CLANG_VERSION/bin
 export LLVM=1
 
 AK3_DIR="$HOME/AnyKernel3"
-VARIANTS=("fts" "gdx")
-DEFCONFIGS=("vendor/bangkk_fts_defconfig" "vendor/bangkk_gdx_defconfig")
+VARIANTS=("bangkk" "bangkk")
+DEFCONFIGS=("vendor/bangkk_defconfig" "vendor/bangkk_defconfig")
 ZIPNAME_PREFIX="MoeKernel-$(date '+%Y%m%d-%H%M')"
 LOG_FILE="moe.log"
 : > "$LOG_FILE"
@@ -77,9 +77,9 @@ echo -e "\nKernel compiled successfully for $DEFCONFIG! Zipping up...\n" | tee -
 
 if [ -d "$AK3_DIR" ]; then
     cp -r $AK3_DIR AnyKernel3
-    git -C AnyKernel3 checkout susfs &> /dev/null
+    git -C AnyKernel3 checkout bangkk &> /dev/null
 else
-    git clone -q https://github.com/MoeKernel/AnyKernel3 -b susfs
+    git clone -q https://github.com/MoeKernel/AnyKernel3 -b bangkk
 fi
 
 cp out/.config AnyKernel3/config
