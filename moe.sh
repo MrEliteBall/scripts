@@ -27,9 +27,9 @@ if [[ $# -ne 2 || $1 != "--variant" || ! " ${VARIANTS[@]} " =~ " $2 " ]]; then
 fi
 
 VARIANT="$2"
-if [[ "$VARIANT" == "fts" ]]; then
+if [[ "$VARIANT" == "bangkk" ]]; then
     DEFCONFIG="${DEFCONFIGS[0]}"
-elif [[ "$VARIANT" == "gdx" ]]; then
+elif [[ "$VARIANT" == "bangkk" ]]; then
     DEFCONFIG="${DEFCONFIGS[1]}"
 fi
 
