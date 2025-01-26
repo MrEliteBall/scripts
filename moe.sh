@@ -22,7 +22,7 @@ LOG_FILE="moe.log"
 : > "$LOG_FILE"
 
 if [[ $# -ne 2 || $1 != "--variant" || ! " ${VARIANTS[@]} " =~ " $2 " ]]; then
-    echo "Use: $0 --variant {fts|gdx}" | tee -a "$LOG_FILE"
+    echo "Use: $0 --variant {bangkk|bangkk}" | tee -a "$LOG_FILE"
     exit 1
 fi
 
