@@ -17,12 +17,12 @@ export LLVM=1
 AK3_DIR="$HOME/AnyKernel3"
 VARIANTS=("bangkk" "bangkk")
 DEFCONFIGS=("vendor/bangkk_defconfig" "vendor/bangkk_defconfig")
-ZIPNAME_PREFIX="MoeKernel-$(date '+%Y%m%d-%H%M')"
+ZIPNAME_PREFIX="sushi-$(date '+%Y%m%d-%H%M')"
 LOG_FILE="moe.log"
 : > "$LOG_FILE"
 
 if [[ $# -ne 2 || $1 != "--variant" || ! " ${VARIANTS[@]} " =~ " $2 " ]]; then
-    echo "Use: $0 --variant {bangkk|bangkk}" | tee -a "$LOG_FILE"
+    echo "Use: $0 --variant {fogos}" | tee -a "$LOG_FILE"
     exit 1
 fi
 
@@ -35,7 +35,7 @@ fi
 
 if ! [ -d "${TC_DIR}" ]; then
     echo "Clang not found! Cloning to ${TC_DIR}..." | tee -a "$LOG_FILE"
-    if ! git clone --depth=1 https://gitlab.com/moehacker/clang-r487747.git ${TC_DIR} >> "$LOG_FILE" 2>&1; then
+    if ! git clone --depth=1 https://gitlab.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-r530567.git ${TC_DIR} >> "$LOG_FILE" 2>&1; then
         echo "Cloning failed! Aborting..." | tee -a "$LOG_FILE"
         exit 1
     fi
@@ -77,7 +77,7 @@ echo -e "\nKernel compiled successfully for $DEFCONFIG! Zipping up...\n" | tee -
 
 if [ -d "$AK3_DIR" ]; then
     cp -r $AK3_DIR AnyKernel3
-    git -C AnyKernel3 checkout bangkk &> /dev/null
+    git -C AnyKernel3 checkout fogos &> /dev/null
 else
     git clone -q https://github.com/MoeKernel/AnyKernel3 -b bangkk
 fi
@@ -92,7 +92,7 @@ ZIPNAME="${ZIPNAME_PREFIX}-${VARIANT}.zip"
 mkdir -p ${modpath}
 kver=$(make kernelversion)
 kmod=$(echo ${kver} | awk -F'.' '{print $3}')
-mkdir -p AnyKernel3/modules/vendor/lib/modules 
+mkdir -p AnyKernel3/modules/vendor/lib/modules
 kver=$(make kernelversion)
 kmod=$(echo ${kver} | awk -F'.' '{print $3}')
 
@@ -103,6 +103,7 @@ cp out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
 cp $(find out/modules/lib/modules/5.4* -name '*.ko') ${modpath}/
 cp out/modules/lib/modules/5.4*/modules.{alias,dep,softdep} ${modpath}/
 cp out/modules/lib/modules/5.4*/modules.order ${modpath}/modules.load
+
 sed -i 's/\(kernel\/[^: ]*\/\)\([^: ]*\.ko\)/\/vendor\/lib\/modules\/\2/g' ${modpath}/modules.dep
 sed -i 's/.*\///; s/\.ko$//' ${modpath}/modules.load
 
