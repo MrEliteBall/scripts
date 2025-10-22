@@ -22,7 +22,7 @@ LOG_FILE="moe.log"
 : > "$LOG_FILE"
 
 if [[ $# -ne 2 || $1 != "--variant" || ! " ${VARIANTS[@]} " =~ " $2 " ]]; then
-    echo "Use: $0 --variant {fogos}" | tee -a "$LOG_FILE"
+    echo "Use: $0 --variant {bangkk}" | tee -a "$LOG_FILE"
     exit 1
 fi
 
@@ -77,7 +77,7 @@ echo -e "\nKernel compiled successfully for $DEFCONFIG! Zipping up...\n" | tee -
 
 if [ -d "$AK3_DIR" ]; then
     cp -r $AK3_DIR AnyKernel3
-    git -C AnyKernel3 checkout fogos &> /dev/null
+    git -C AnyKernel3 checkout bangkk &> /dev/null
 else
     git clone -q https://github.com/MoeKernel/AnyKernel3 -b bangkk
 fi
