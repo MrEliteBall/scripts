@@ -81,12 +81,12 @@ EOF
     build_info=$(cat <<EOF
 *bangkk build (#${build_count}) has succeeded*
 *Kernel Version*: ${kernel_version}
-*Build Type*: \`${build_type}\` *(SuSFS/KSU/Fifteen)*
+*Build Type*: \`${build_type}\` *(Sixteen)*
 *Tag*: \`${tag}\`
 
 *Duration*: ${elapsed_minutes} Minutes ${elapsed_seconds} Seconds
 
-@MoeKernel #bangkk #ksu #susfs
+@MoeKernel #bangkk
 EOF
 )
 
@@ -124,7 +124,7 @@ EOF
         -d parse_mode="Markdown"
 
     curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-        -d chat_id="@MoeNyanCI" \
+        -d chat_id="@SushiKernelCI" \
         -d text="$build_info" \
         -d parse_mode="Markdown"
 
