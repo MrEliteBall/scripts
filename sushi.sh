@@ -22,7 +22,7 @@ LOG_FILE="moe.log"
 : > "$LOG_FILE"
 
 if [[ $# -ne 2 || $1 != "-v" || ! " ${VARIANTS[@]} " =~ " $2 " ]]; then
-    echo "Use: $0 -v {fogos}" | tee -a "$LOG_FILE"
+    echo "Use: $0 -v {bangkk}" | tee -a "$LOG_FILE"
     exit 1
 fi
 
