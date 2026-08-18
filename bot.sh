@@ -54,7 +54,7 @@ if [[ $? -eq 0 ]]; then
     commit_text=$message_commit
 
 	commit_link=$(cat <<EOF
-[${commit_text}](https://github.com/MoeKernel/android_kernel_motorola_bangkk/commit/${commit_hash})
+[${commit_text}](https://github.com/SushiKernel/android_kernel_motorola_bangkk/commit/${commit_hash})
 EOF
 )
 
