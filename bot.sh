@@ -86,7 +86,7 @@ EOF
 
 *Duration*: ${elapsed_minutes} Minutes ${elapsed_seconds} Seconds
 
-@MoeKernel #bangkk
+@SushiKernel #bangkk
 EOF
 )
 
