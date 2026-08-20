@@ -83,8 +83,8 @@ fi
 
 cp out/.config AnyKernel3/config
 cp out/arch/arm64/boot/Image AnyKernel3/Image
-# [ -f out/arch/arm64/boot/dtb.img ] && cp out/arch/arm64/boot/dtb.img AnyKernel3/dtb
-# [ -f out/arch/arm64/boot/dtbo.img ] && cp out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
+[ -f out/arch/arm64/boot/dtb.img ] && cp out/arch/arm64/boot/dtb.img AnyKernel3/dtb
+[ -f out/arch/arm64/boot/dtbo.img ] && cp out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
 
 ZIPNAME="${ZIPNAME_PREFIX}-${VARIANT}.zip"
 
