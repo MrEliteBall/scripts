@@ -35,8 +35,10 @@ kernel_version=$(make kernelversion 2>/dev/null)
 build_type="release"
 tag="bangkk_${commit_hash:0:7}_$(date +%Y%m%d)"
 
+my_id=5297238586
+
 start_message=$(curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-    -d chat_id=$CHAT_ID \
+    -d chat_id=$my_id \
     -d text="*Compilation started... please wait.*" \
     -d parse_mode="Markdown")
 
@@ -92,7 +94,7 @@ EOF
 
     log_file=$(ls *moe.log | head -n 1)
     if [[ -n "$log_file" ]]; then
-        curl -s -F chat_id=$CHAT_ID \
+        curl -s -F chat_id=$my_id \
             -F document=@"$log_file" \
             -F caption="MoeLog Nyan!" \
             -F parse_mode="Markdown" \
@@ -132,7 +134,7 @@ EOF
     exit 0
 else
     curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-        -d chat_id=$CHAT_ID \
+        -d chat_id=$my_id \
         -d text="Compilation failed." \
         -d parse_mode="Markdown"
     exit 1
