@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-# Compile script for Sashimi Kernel
+# Compile script for Sashimi Kernel.
+# Adapted from Sushi to Sashimi.
 # Copyright (C) 2024 Akari.
 
 SECONDS=0
