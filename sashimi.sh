@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Compile script for SushiKernel
+# Compile script for Sashimi Kernel
 # Copyright (C) 2024 Akari.
 
 SECONDS=0
@@ -9,7 +9,7 @@ TC_DIR="$HOME/tc/$CLANG_VERSION"
 PATH=$HOME/tc/$CLANG_VERSION/bin:$PATH
 
 export ARCH=arm64
-export KBUILD_BUILD_USER=Sushi
+export KBUILD_BUILD_USER=Sashimi
 export KBUILD_BUILD_HOST=Kernel
 export LLVM_DIR=$HOME/tc/$CLANG_VERSION/bin
 export LLVM=1
@@ -78,7 +78,7 @@ if [ -d "$AK3_DIR" ]; then
     cp -r $AK3_DIR AnyKernel3
     git -C AnyKernel3 checkout bangkk &> /dev/null
 else
-    git clone -q https://github.com/MoeKernel/AnyKernel3 -b bangkk
+    git clone -q https://github.com/MrEliteBall/AnyKernel3 -b bangkk
 fi
 
 cp out/.config AnyKernel3/config
