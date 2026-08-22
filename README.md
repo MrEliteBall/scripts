@@ -1,1 +1,1 @@
-## scripts - SushiKernel
+## Scripts - Sashimi Kernel
