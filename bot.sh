@@ -11,7 +11,7 @@ export CHANNEL_ID="${CHANNEL_ID:-@SashimiKernelCI}"
 export MESSAGE_THREAD_ID="${MESSAGE_THREAD_ID:-}"
 
 if [[ -z "$BOT_TOKEN" || -z "$CHAT_ID" ]]; then
-    echo "Error: BOT_TOKEN ou CHAT_ID não configurados."
+    echo "Error: BOT_TOKEN or CHAT_ID not set."
     exit 1
 fi
 
@@ -35,7 +35,7 @@ tag="bangkk_${commit_hash:0:7}_$(date +%Y%m%d)"
 
 start_message=$(curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
     -d chat_id="$MY_ID" \
-    -d text="🍣 *Compilação do Sashimi Kernel iniciada...*" \
+    -d text="🍣 *Sashimi Kernel compilation started...*" \
     -d parse_mode="Markdown")
 
 start_time=$(date +%s)
@@ -52,11 +52,11 @@ if [[ $? -eq 0 ]]; then
 
     build_info=$(cat <<EOF
 🍣 *Sashimi Kernel | bangkk (#${build_count})*
-*Status*: Sucesso!
-*Versão*: ${kernel_version}
+*Status*: Success!
+*Version*: ${kernel_version}
 *Commit*: ${commit_link}
-*Autor*: \`${author_name}\`
-*Duração*: ${elapsed_minutes}m ${elapsed_seconds}s
+*Author*: \`${author_name}\`
+*Duration*: ${elapsed_minutes}m ${elapsed_seconds}s
 
 #bangkk #SashimiKernel
 EOF
@@ -67,8 +67,8 @@ EOF
         caption=$(cat <<EOF
 🍣 *Sashimi Kernel (bangkk)*
 • *Commit*: \`${commit_id}\`
-• *Mensagem*: \`${commit_text}\`
-• *Tempo*: ${elapsed_minutes}m ${elapsed_seconds}s
+• *Message*: \`${commit_text}\`
+• *Duration*: ${elapsed_minutes}m ${elapsed_seconds}s
 EOF
 )
         curl -s -F chat_id="$CHAT_ID" \
@@ -88,7 +88,7 @@ EOF
 else
     curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
         -d chat_id="$MY_ID" \
-        -d text="❌ *Compilação falhou!*" \
-        -d parse_mode="Markdown")
+        -d text="❌ *Compilation failed!*" \
+        -d parse_mode="Markdown"
     exit 1
 fi
