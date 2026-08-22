@@ -2,18 +2,16 @@
 
 if [[ -f ".env" ]]; then
     source .env
-else
-    echo "Error: .env file not found."
-    exit 1
 fi
 
-export CHAT_ID="${CHAT_ID:-}"
-export API_ID="${API_ID:-}"
-export API_HASH="${API_HASH:-}"
 export BOT_TOKEN="${BOT_TOKEN:-}"
+export CHAT_ID="${CHAT_ID:-}"
+export MY_ID="${MY_ID:-$CHAT_ID}"
+export CHANNEL_ID="${CHANNEL_ID:-@SashimiKernelCI}"
+export MESSAGE_THREAD_ID="${MESSAGE_THREAD_ID:-}"
 
-if [[ -z "$CHAT_ID" || -z "$API_ID" || -z "$API_HASH" || -z "$BOT_TOKEN" ]]; then
-    echo "Error: Environment variables not set correctly."
+if [[ -z "$BOT_TOKEN" || -z "$CHAT_ID" ]]; then
+    echo "Error: BOT_TOKEN ou CHAT_ID não configurados."
     exit 1
 fi
 
@@ -27,118 +25,70 @@ echo $build_count > build_count.txt
 
 commit_head=$(git log --oneline -1 --pretty=format:'%h - %an')
 commit_id=$(git log --oneline -1 --pretty=format:'%h')
-author_name=$(echo $commit_head | cut -d ' ' -f 3-)
-commit_hash=$(echo $commit_head | cut -d ' ' -f 1)
+author_name=$(echo "$commit_head" | cut -d ' ' -f 3-)
+commit_hash=$(echo "$commit_head" | cut -d ' ' -f 1)
+commit_text=$(git log --oneline -1 | cut -d ' ' -f 2-)
 
-kernel_version=$(make kernelversion 2>/dev/null)
-
-build_type="release"
+kernel_version=$(make kernelversion 2>/dev/null || echo "5.4.x")
+build_type="Release"
 tag="bangkk_${commit_hash:0:7}_$(date +%Y%m%d)"
 
-my_id=5297238586
-
 start_message=$(curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-    -d chat_id=$my_id \
-    -d text="*Compilation started... please wait.*" \
+    -d chat_id="$MY_ID" \
+    -d text="🍣 *Compilação do Sashimi Kernel iniciada...*" \
     -d parse_mode="Markdown")
 
 start_time=$(date +%s)
 
-./sushi.sh -v bangkk
+./sashimi.sh -v bangkk
 
 if [[ $? -eq 0 ]]; then
-    commit_head=$(git log --oneline -1 --pretty=format:'%h - %an')
-    commit_id=$(git log --oneline -1 --pretty=format:'%h')
-    author_name=$(echo $commit_head | cut -d ' ' -f 3-)
-    commit_hash=$(echo $commit_head | cut -d ' ' -f 1)
-    
-    message_commit=$(git log --oneline -1 | cut -d ' ' -f 2-)
-    commit_text=$message_commit
-
-	commit_link=$(cat <<EOF
-[${commit_text}](https://github.com/SushiKernel/android_kernel_motorola_bangkk/commit/${commit_hash})
-EOF
-)
-
     end_time=$(date +%s)
     elapsed_time=$((end_time - start_time))
     elapsed_minutes=$((elapsed_time / 60))
     elapsed_seconds=$((elapsed_time % 60))
-    elapsed_minutes_formatted=$(printf "%.2f" $(echo "$elapsed_minutes + $elapsed_seconds / 60" | bc -l))
 
-	completion_message=$(cat <<EOF
-Completed in ${elapsed_minutes_formatted} minute(s) and ${elapsed_seconds} second(s)!"
-EOF
-)
+    commit_link="[${commit_text}](https://github.com/MrEliteBall/android_kernel_motorola_bangkk/commit/${commit_hash})"
 
-	completed_compile_text=$(cat <<EOF
-*Compilation completed!*
-
-Commit: ${commit_link}
-
-${completion_message}
-EOF
-)
-	
     build_info=$(cat <<EOF
-*bangkk build (#${build_count}) has succeeded*
-*Kernel Version*: ${kernel_version}
-*Build Type*: \`${build_type}\` *(Sixteen)*
-*Tag*: \`${tag}\`
+🍣 *Sashimi Kernel | bangkk (#${build_count})*
+*Status*: Sucesso!
+*Versão*: ${kernel_version}
+*Commit*: ${commit_link}
+*Autor*: \`${author_name}\`
+*Duração*: ${elapsed_minutes}m ${elapsed_seconds}s
 
-*Duration*: ${elapsed_minutes} Minutes ${elapsed_seconds} Seconds
-
-@SushiKernel #bangkk
+#bangkk #SashimiKernel
 EOF
 )
 
-    log_file=$(ls *moe.log | head -n 1)
-    if [[ -n "$log_file" ]]; then
-        curl -s -F chat_id=$my_id \
-            -F document=@"$log_file" \
-            -F caption="MoeLog Nyan!" \
-            -F parse_mode="Markdown" \
-            "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
-    fi
-
-	zip_file=$(ls *.zip | head -n 1)
+    zip_file=$(ls *.zip | head -n 1)
     if [[ -n "$zip_file" ]]; then
-		caption=$(cat <<EOF
-*Build Info*
-
+        caption=$(cat <<EOF
+🍣 *Sashimi Kernel (bangkk)*
 • *Commit*: \`${commit_id}\`
-• *Message*: \`${commit_text}\`
-• *Author*: \`${author_name}\`
+• *Mensagem*: \`${commit_text}\`
+• *Tempo*: ${elapsed_minutes}m ${elapsed_seconds}s
 EOF
 )
-        curl -s -F chat_id=$CHAT_ID \
+        curl -s -F chat_id="$CHAT_ID" \
             -F document=@"$zip_file" \
-	    -F message_thread_id=$MESSAGE_THREAD_ID \
+            ${MESSAGE_THREAD_ID:+-F message_thread_id="$MESSAGE_THREAD_ID"} \
             -F caption="$caption" \
             -F parse_mode="Markdown" \
             "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
     fi
 
-    message_id=$(echo $start_message | jq .result.message_id)
-    curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/editMessageText" \
-        -d chat_id=$CHAT_ID \
-        -d message_id=$message_id \
-        -d text="$completed_compile_text" \
-        -d parse_mode="Markdown"
-
     curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-        -d chat_id="@SushiKernelCI" \
+        -d chat_id="$CHANNEL_ID" \
         -d text="$build_info" \
         -d parse_mode="Markdown"
 
     exit 0
 else
     curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-        -d chat_id=$my_id \
-        -d text="Compilation failed." \
-        -d parse_mode="Markdown"
+        -d chat_id="$MY_ID" \
+        -d text="❌ *Compilação falhou!*" \
+        -d parse_mode="Markdown")
     exit 1
 fi
-
-echo "bot is running..."
-
