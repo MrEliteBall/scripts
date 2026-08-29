@@ -5,7 +5,7 @@
 # Copyright (C) 2024 Akari.
 
 SECONDS=0
-CLANG_VERSION="clang-21.0.0"
+CLANG_VERSION="clang-22.0.2"
 TC_DIR="$HOME/tc/$CLANG_VERSION"
 PATH=$HOME/tc/$CLANG_VERSION/bin:$PATH
 
@@ -34,8 +34,8 @@ if ! [ -d "${TC_DIR}" ]; then
     echo "Clang not found! Downloading directly to ${TC_DIR}..." | tee -a "$LOG_FILE"
     mkdir -p "${TC_DIR}"
 
-    if ! curl -L "https://git.codelinaro.org/clo/la/kernel_platform/prebuilts/build-tools/-/archive/android-16.0.0_r4/build-tools-android-16.0.0_r4.tar.gz?path=clang-r563880c" \
-         | tar -xz -C "${TC_DIR}" --strip-components=2 >> "$LOG_FILE" 2>&1; then
+    if ! curl -sSL "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r596125.tar.gz" \
+         | tar -xz -C "${TC_DIR}" >> "$LOG_FILE" 2>&1; then
         echo "Download failed! Aborting..." | tee -a "$LOG_FILE"
         exit 1
     fi
@@ -97,6 +97,6 @@ echo -e "\nCompleted compilation for $DEFCONFIG (variant $VARIANT) in $((SECONDS
 echo "Zip: $ZIPNAME" | tee -a "$LOG_FILE"
 
 [ -f ./go-up ] || (wget https://raw.githubusercontent.com/GustavoMends/go-up/master/go-up && chmod +x go-up)
-# ./go-up "$ZIPNAME"
+./go-up "$ZIPNAME"
 
 rm -rf AnyKernel3
