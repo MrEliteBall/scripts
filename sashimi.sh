@@ -30,15 +30,26 @@ fi
 VARIANT="$2"
 DEFCONFIG="${DEFCONFIGS[0]}"
 
-if ! [ -d "${TC_DIR}" ]; then
-    echo "Clang not found! Cloning directly to ${TC_DIR}..." | tee -a "$LOG_FILE"
-    
-    if ! git clone --depth=1 --progress -b mirror-goog-llvm-r596125-release \
-     https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 "${TC_DIR}" 2>&1 | tee -a "$LOG_FILE"; then
-    echo "Git clone failed! Aborting..." | tee -a "$LOG_FILE"
-    exit 1
-fi
-    echo "Clang setup completed successfully!" | tee -a "$LOG_FILE"
+if ! [ -d "${TC_DIR}/bin" ]; then
+    echo "Clang not found! Downloading clang-r596125 via sparse-checkout..." | tee -a "$LOG_FILE"
+    mkdir -p "${TC_DIR}"
+    TEMP_DIR=$(mktemp -d)
+
+    git clone --depth 1 --filter=blob:none --sparse \
+        -b mirror-goog-llvm-r596125-release \
+        https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 "$TEMP_DIR" >> "$LOG_FILE" 2>&1
+
+    git -C "$TEMP_DIR" sparse-checkout set clang-r596125 >> "$LOG_FILE" 2>&1
+
+    if [ -d "$TEMP_DIR/clang-r596125" ]; then
+        mv "$TEMP_DIR"/clang-r596125/* "${TC_DIR}/"
+        rm -rf "$TEMP_DIR"
+        echo "Clang setup completed successfully!" | tee -a "$LOG_FILE"
+    else
+        echo "Error: Failed to fetch clang-r596125. Aborting..." | tee -a "$LOG_FILE"
+        rm -rf "$TEMP_DIR"
+        exit 1
+    fi
 fi
 
 echo -e "\nCompiling for $DEFCONFIG with variant $VARIANT..." | tee -a "$LOG_FILE"
