@@ -5,7 +5,7 @@
 # Copyright (C) 2024 Akari.
 
 SECONDS=0
-CLANG_VERSION="clang-22.1.0"
+CLANG_VERSION="clang-22.0.2"
 TC_DIR="$HOME/tc/$CLANG_VERSION"
 PATH=$HOME/tc/$CLANG_VERSION/bin:$PATH
 
@@ -34,7 +34,7 @@ if ! [ -f "${LLVM_DIR}/clang" ]; then
     echo "Clang not found! Downloading LLVM 22.1.0 from GitHub Releases..." | tee -a "$LOG_FILE"
     mkdir -p "${TC_DIR}"
 
-    if ! curl -fSL "https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.0/LLVM-22.1.0-Linux-X64.tar.xz" \
+    if ! curl -fSL "https://github.com/Samw662/aosp-clang-toolchains/releases/download/clang-22/clang-r596125.tar.gz" \
          | tar -xJ -C "${TC_DIR}" --strip-components=1 >> "$LOG_FILE" 2>&1; then
         echo "Download failed! Aborting..." | tee -a "$LOG_FILE"
         exit 1
