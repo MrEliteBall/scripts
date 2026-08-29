@@ -31,14 +31,22 @@ VARIANT="$2"
 DEFCONFIG="${DEFCONFIGS[0]}"
 
 if ! [ -f "${LLVM_DIR}/clang" ]; then
-    echo "Clang not found! Downloading LLVM 22.1.0 from GitHub Releases..." | tee -a "$LOG_FILE"
+    echo "Clang not found! Downloading AOSP Clang..." | tee -a "$LOG_FILE"
     mkdir -p "${TC_DIR}"
 
-    if ! curl -fSL "https://github.com/Samw662/aosp-clang-toolchains/releases/download/clang-22/clang-r596125.tar.gz" \
-         | tar -xJ -C "${TC_DIR}" --strip-components=1 >> "$LOG_FILE" 2>&1; then
+    if ! curl -fSL "https://github.com/Samw662/aosp-clang-toolchains/releases/download/clang-22/clang-r596125.tar.gz" -o "$HOME/clang.tar.gz" 2>&1 | tee -a "$LOG_FILE"; then
         echo "Download failed! Aborting..." | tee -a "$LOG_FILE"
         exit 1
     fi
+
+    tar -xzf "$HOME/clang.tar.gz" -C "${TC_DIR}" >> "$LOG_FILE" 2>&1
+    rm -f "$HOME/clang.tar.gz"
+
+    if [ -d "${TC_DIR}/clang-r596125/bin" ]; then
+        mv "${TC_DIR}"/clang-r596125/* "${TC_DIR}/"
+        rm -rf "${TC_DIR}/clang-r596125"
+    fi
+
     echo "Clang setup completed successfully!" | tee -a "$LOG_FILE"
 fi
 
