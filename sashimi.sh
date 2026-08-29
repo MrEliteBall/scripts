@@ -1,8 +1,4 @@
 #!/bin/bash
-#
-# Compile script for Sashimi Kernel.
-# Adapted from Sushi to Sashimi.
-# Copyright (C) 2024 Akari.
 
 SECONDS=0
 CLANG_VERSION="clang-22.0.2"
@@ -34,8 +30,7 @@ if ! [ -d "${TC_DIR}" ]; then
     echo "Clang not found! Downloading directly to ${TC_DIR}..." | tee -a "$LOG_FILE"
     mkdir -p "${TC_DIR}"
 
-    if ! curl -sSL "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/mirror-goog-llvm-r596125-release.tar.gz
-    " \
+    if ! curl -fSL "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/mirror-goog-llvm-r596125-release.tar.gz" \
          | tar -xz -C "${TC_DIR}" >> "$LOG_FILE" 2>&1; then
         echo "Download failed! Aborting..." | tee -a "$LOG_FILE"
         exit 1
