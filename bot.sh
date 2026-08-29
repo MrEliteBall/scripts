@@ -1,34 +1,38 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -eo pipefail
 
 if [[ -f ".env" ]]; then
     source .env
 fi
 
-export BOT_TOKEN="${BOT_TOKEN:-}"
-export CHAT_ID="${CHAT_ID:-}"
-export MESSAGE_THREAD_ID="${MESSAGE_THREAD_ID:-}"
+BOT_TOKEN="${BOT_TOKEN:-}"
+CHAT_ID="${CHAT_ID:-}"
+MESSAGE_THREAD_ID="${MESSAGE_THREAD_ID:-}"
 
 if [[ -z "$BOT_TOKEN" || -z "$CHAT_ID" ]]; then
-    echo "Error: BOT_TOKEN or CHAT_ID not set."
+    echo "Error: BOT_TOKEN or CHAT_ID not set." >&2
     exit 1
 fi
 
-commit_id=$(git log --oneline -1 --pretty=format:'%h')
-commit_text=$(git log --oneline -1 | cut -d ' ' -f 2-)
+commit_id=$(git log -1 --format='%h')
+commit_text=$(git log -1 --format='%s')
 
 start_time=$(date +%s)
 
-./sashimi.sh -v bangkk
-
-if [[ $? -eq 0 ]]; then
+if ./sashimi.sh -v bangkk; then
     end_time=$(date +%s)
     elapsed_time=$((end_time - start_time))
     elapsed_minutes=$((elapsed_time / 60))
     elapsed_seconds=$((elapsed_time % 60))
 
-    orig_zip=$(ls *.zip 2>/dev/null | head -n 1)
-    if [[ -n "$orig_zip" ]]; then
+    shopt -s nullglob
+    zips=( *.zip )
+    shopt -u nullglob
+
+    if [[ ${#zips[@]} -gt 0 ]]; then
+        orig_zip="${zips[0]}"
         new_zip="sashimi-$(date +%Y%m%d-%H%M)-bangkk.zip"
+
         if [[ "$orig_zip" != "$new_zip" ]]; then
             mv "$orig_zip" "$new_zip"
         fi
@@ -39,14 +43,18 @@ if [[ $? -eq 0 ]]; then
 • Message: ${commit_text}
 • Duration: ${elapsed_minutes}m ${elapsed_seconds}s"
 
-        curl -s -F chat_id="$CHAT_ID" \
+        curl -s -f \
+            -F chat_id="$CHAT_ID" \
             -F document=@"$zip_file" \
             ${MESSAGE_THREAD_ID:+-F message_thread_id="$MESSAGE_THREAD_ID"} \
             -F caption="$caption" \
-            "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+            "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument" > /dev/null
+    else
+        echo "Warning: Build succeeded but no .zip output was found." >&2
     fi
 
     exit 0
 else
+    echo "Build failed." >&2
     exit 1
 fi
