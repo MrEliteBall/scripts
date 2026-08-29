@@ -6,19 +6,16 @@
 
 SECONDS=0
 CLANG_VERSION="clang-22.0.2"
-TC_BASE="$HOME/tc/$CLANG_VERSION"
 
-if [ -d "${TC_BASE}/clang-r596125/bin" ]; then
-    TC_DIR="${TC_BASE}/clang-r596125"
-else
-    TC_DIR="${TC_BASE}"
-fi
+SECONDS=0
+CLANG_VERSION="clang-22.0.2"
+TC_DIR="$HOME/tc/$CLANG_VERSION"
+PATH="$TC_DIR/bin:$PATH"
 
-PATH="${TC_DIR}/bin:$PATH"
 export ARCH=arm64
 export KBUILD_BUILD_USER=Sashimi
 export KBUILD_BUILD_HOST=Kernel
-export LLVM_DIR="${TC_DIR}/bin"
+export LLVM_DIR="$TC_DIR/bin"
 export LLVM=1
 
 AK3_DIR="$HOME/AnyKernel3"
@@ -37,22 +34,25 @@ VARIANT="$2"
 DEFCONFIG="${DEFCONFIGS[0]}"
 
 if [ ! -f "${LLVM_DIR}/clang" ]; then
-    echo "Clang not found! Cloning toolchain directly to ${TC_BASE}..." | tee -a "$LOG_FILE"
-    rm -rf "${TC_BASE}"
-    mkdir -p "${TC_BASE}"
+    echo "Clang not found! Cloning toolchain..." | tee -a "$LOG_FILE"
+    rm -rf "${TC_DIR}"
+    TEMP_DIR=$(mktemp -d)
 
     if ! git clone --depth=1 --single-branch \
          -b mirror-goog-llvm-r596125-release \
-         https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 "${TC_BASE}" 2>&1 | tee -a "$LOG_FILE"; then
+         https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 "$TEMP_DIR" 2>&1 | tee -a "$LOG_FILE"; then
         echo "Error: Failed to clone Clang. Aborting..." | tee -a "$LOG_FILE"
+        rm -rf "$TEMP_DIR"
         exit 1
     fi
 
-    if [ -d "${TC_BASE}/clang-r596125/bin" ]; then
-        TC_DIR="${TC_BASE}/clang-r596125"
-        PATH="${TC_DIR}/bin:$PATH"
-        export LLVM_DIR="${TC_DIR}/bin"
+    mkdir -p "${TC_DIR}"
+    if [ -d "$TEMP_DIR/clang-r596125" ]; then
+        mv "$TEMP_DIR"/clang-r596125/* "${TC_DIR}/"
+    else
+        mv "$TEMP_DIR"/* "${TC_DIR}/"
     fi
+    rm -rf "$TEMP_DIR"
     echo "Clang setup completed successfully!" | tee -a "$LOG_FILE"
 fi
 
