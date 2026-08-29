@@ -33,11 +33,11 @@ DEFCONFIG="${DEFCONFIGS[0]}"
 if ! [ -d "${TC_DIR}" ]; then
     echo "Clang not found! Cloning directly to ${TC_DIR}..." | tee -a "$LOG_FILE"
     
-    if ! git clone --depth=1 -b mirror-goog-llvm-r596125-release \
-         https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 "${TC_DIR}" >> "$LOG_FILE" 2>&1; then
-        echo "Git clone failed! Aborting..." | tee -a "$LOG_FILE"
-        exit 1
-    fi
+    if ! git clone --depth=1 --progress -b mirror-goog-llvm-r596125-release \
+     https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 "${TC_DIR}" 2>&1 | tee -a "$LOG_FILE"; then
+    echo "Git clone failed! Aborting..." | tee -a "$LOG_FILE"
+    exit 1
+fi
     echo "Clang setup completed successfully!" | tee -a "$LOG_FILE"
 fi
 
