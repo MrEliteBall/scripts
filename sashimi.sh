@@ -5,14 +5,14 @@
 # Copyright (C) 2024 Akari.
 
 SECONDS=0
-CLANG_VERSION="clang-22.0.2"
+CLANG_VERSION="clang-22.1.0"
 TC_DIR="$HOME/tc/$CLANG_VERSION"
-PATH="$TC_DIR/bin:$PATH"
+PATH=$HOME/tc/$CLANG_VERSION/bin:$PATH
 
 export ARCH=arm64
 export KBUILD_BUILD_USER=Sashimi
 export KBUILD_BUILD_HOST=Kernel
-export LLVM_DIR="$TC_DIR/bin"
+export LLVM_DIR=$HOME/tc/$CLANG_VERSION/bin
 export LLVM=1
 
 AK3_DIR="$HOME/AnyKernel3"
@@ -30,26 +30,15 @@ fi
 VARIANT="$2"
 DEFCONFIG="${DEFCONFIGS[0]}"
 
-if [ ! -f "${LLVM_DIR}/clang" ]; then
-    echo "Clang not found! Cloning toolchain..." | tee -a "$LOG_FILE"
-    rm -rf "${TC_DIR}"
-    TEMP_DIR=$(mktemp -d)
+if ! [ -f "${LLVM_DIR}/clang" ]; then
+    echo "Clang not found! Downloading LLVM 22.1.0 from GitHub Releases..." | tee -a "$LOG_FILE"
+    mkdir -p "${TC_DIR}"
 
-    if ! git clone --depth=1 --single-branch \
-         -b mirror-goog-llvm-r596125-release \
-         https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 "$TEMP_DIR" 2>&1 | tee -a "$LOG_FILE"; then
-        echo "Error: Failed to clone Clang. Aborting..." | tee -a "$LOG_FILE"
-        rm -rf "$TEMP_DIR"
+    if ! curl -fSL "https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.0/LLVM-22.1.0-Linux-X64.tar.xz" \
+         | tar -xJ -C "${TC_DIR}" --strip-components=1 >> "$LOG_FILE" 2>&1; then
+        echo "Download failed! Aborting..." | tee -a "$LOG_FILE"
         exit 1
     fi
-
-    mkdir -p "${TC_DIR}"
-    if [ -d "$TEMP_DIR/clang-r596125" ]; then
-        mv "$TEMP_DIR"/clang-r596125/* "${TC_DIR}/"
-    else
-        mv "$TEMP_DIR"/* "${TC_DIR}/"
-    fi
-    rm -rf "$TEMP_DIR"
     echo "Clang setup completed successfully!" | tee -a "$LOG_FILE"
 fi
 
