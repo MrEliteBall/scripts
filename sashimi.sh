@@ -31,12 +31,11 @@ VARIANT="$2"
 DEFCONFIG="${DEFCONFIGS[0]}"
 
 if ! [ -d "${TC_DIR}" ]; then
-    echo "Clang not found! Downloading directly to ${TC_DIR}..." | tee -a "$LOG_FILE"
-    mkdir -p "${TC_DIR}"
-
-    if ! curl -fSL "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/mirror-goog-llvm-r596125-release/clang-r596125.tar.gz" \
-         | tar -xz -C "${TC_DIR}" >> "$LOG_FILE" 2>&1; then
-        echo "Download failed! Aborting..." | tee -a "$LOG_FILE"
+    echo "Clang not found! Cloning directly to ${TC_DIR}..." | tee -a "$LOG_FILE"
+    
+    if ! git clone --depth=1 -b mirror-goog-llvm-r596125-release \
+         https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 "${TC_DIR}" >> "$LOG_FILE" 2>&1; then
+        echo "Git clone failed! Aborting..." | tee -a "$LOG_FILE"
         exit 1
     fi
     echo "Clang setup completed successfully!" | tee -a "$LOG_FILE"
