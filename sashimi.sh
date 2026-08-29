@@ -67,6 +67,7 @@ LLVM_AR=${LLVM_DIR}/llvm-ar
 LLVM_DIS=${LLVM_DIR}/llvm-dis
 LLVM_NM=${LLVM_DIR}/llvm-nm
 LLVM=1
+KCFLAGS=-Wno-implicit-enum-enum-cast
 "
 
 make ${ARGS} O=out $DEFCONFIG moto.config | tee -a "$LOG_FILE"
