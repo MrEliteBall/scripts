@@ -6,13 +6,19 @@
 
 SECONDS=0
 CLANG_VERSION="clang-22.0.2"
-TC_DIR="$HOME/tc/$CLANG_VERSION"
-PATH=$HOME/tc/$CLANG_VERSION/bin:$PATH
+TC_BASE="$HOME/tc/$CLANG_VERSION"
 
+if [ -d "${TC_BASE}/clang-r596125/bin" ]; then
+    TC_DIR="${TC_BASE}/clang-r596125"
+else
+    TC_DIR="${TC_BASE}"
+fi
+
+PATH="${TC_DIR}/bin:$PATH"
 export ARCH=arm64
 export KBUILD_BUILD_USER=Sashimi
 export KBUILD_BUILD_HOST=Kernel
-export LLVM_DIR=$HOME/tc/$CLANG_VERSION/bin
+export LLVM_DIR="${TC_DIR}/bin"
 export LLVM=1
 
 AK3_DIR="$HOME/AnyKernel3"
@@ -30,27 +36,29 @@ fi
 VARIANT="$2"
 DEFCONFIG="${DEFCONFIGS[0]}"
 
-if ! [ -d "${TC_DIR}/bin" ]; then
-    echo "Clang not found! Downloading clang-r596125 via sparse-checkout..." | tee -a "$LOG_FILE"
-    mkdir -p "${TC_DIR}"
-    TEMP_DIR=$(mktemp -d)
+if [ ! -f "${LLVM_DIR}/clang" ]; then
+    echo "Clang not found! Cloning toolchain directly to ${TC_BASE}..." | tee -a "$LOG_FILE"
+    rm -rf "${TC_BASE}"
+    mkdir -p "${TC_BASE}"
 
-    git clone --depth 1 --filter=blob:none --sparse \
-        -b mirror-goog-llvm-r596125-release \
-        https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 "$TEMP_DIR" >> "$LOG_FILE" 2>&1
-
-    git -C "$TEMP_DIR" sparse-checkout set clang-r596125 >> "$LOG_FILE" 2>&1
-
-    if [ -d "$TEMP_DIR/clang-r596125" ]; then
-        mv "$TEMP_DIR"/clang-r596125/* "${TC_DIR}/"
-        rm -rf "$TEMP_DIR"
-        echo "Clang setup completed successfully!" | tee -a "$LOG_FILE"
-    else
-        echo "Error: Failed to fetch clang-r596125. Aborting..." | tee -a "$LOG_FILE"
-        rm -rf "$TEMP_DIR"
+    if ! git clone --depth=1 --single-branch \
+         -b mirror-goog-llvm-r596125-release \
+         https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 "${TC_BASE}" 2>&1 | tee -a "$LOG_FILE"; then
+        echo "Error: Failed to clone Clang. Aborting..." | tee -a "$LOG_FILE"
         exit 1
     fi
+
+    if [ -d "${TC_BASE}/clang-r596125/bin" ]; then
+        TC_DIR="${TC_BASE}/clang-r596125"
+        PATH="${TC_DIR}/bin:$PATH"
+        export LLVM_DIR="${TC_DIR}/bin"
+    fi
+    echo "Clang setup completed successfully!" | tee -a "$LOG_FILE"
 fi
+
+echo -e "\nCompiler info:" | tee -a "$LOG_FILE"
+"${LLVM_DIR}/clang" --version | head -n 1 | tee -a "$LOG_FILE"
+"${LLVM_DIR}/ld.lld" --version | head -n 1 | tee -a "$LOG_FILE"
 
 echo -e "\nCompiling for $DEFCONFIG with variant $VARIANT..." | tee -a "$LOG_FILE"
 
