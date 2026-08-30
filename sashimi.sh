@@ -18,7 +18,7 @@ export LLVM=1
 AK3_DIR="$HOME/AnyKernel3"
 VARIANTS=("bangkk")
 DEFCONFIGS=("vendor/bangkk_defconfig")
-ZIPNAME_PREFIX="Sushi-$(date '+%Y%m%d-%H%M')"
+ZIPNAME_PREFIX="Sashimi-$(date '+%Y%m%d-%H%M')"
 LOG_FILE="moe.log"
 : > "$LOG_FILE"
 
