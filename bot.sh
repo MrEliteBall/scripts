@@ -26,17 +26,11 @@ if ./sashimi.sh -v bangkk; then
     elapsed_seconds=$((elapsed_time % 60))
 
     shopt -s nullglob
-    zips=( *.zip )
+    zips=( sashimi-*.zip *.zip )
     shopt -u nullglob
 
     if [[ ${#zips[@]} -gt 0 ]]; then
-        orig_zip="${zips[0]}"
-        new_zip="sashimi-$(date +%Y%m%d-%H%M)-bangkk.zip"
-
-        if [[ "$orig_zip" != "$new_zip" ]]; then
-            mv "$orig_zip" "$new_zip"
-        fi
-        zip_file="$new_zip"
+        zip_file="${zips[0]}"
 
         caption="🍣 Sashimi Kernel (bangkk)
 • Commit: ${commit_id}
