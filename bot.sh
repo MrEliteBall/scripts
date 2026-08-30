@@ -26,7 +26,7 @@ if ./sashimi.sh -v bangkk; then
     elapsed_seconds=$((elapsed_time % 60))
 
     shopt -s nullglob
-    zips=( sashimi-*.zip *.zip )
+    zips=( Sashimi-*.zip *.zip )
     shopt -u nullglob
 
     if [[ ${#zips[@]} -gt 0 ]]; then
