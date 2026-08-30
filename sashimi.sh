@@ -57,7 +57,6 @@ echo -e "\nCompiler info:" | tee -a "$LOG_FILE"
 echo -e "\nCompiling for $DEFCONFIG with variant $VARIANT..." | tee -a "$LOG_FILE"
 
 mkdir -p out
-make O=out ARCH=arm64 $DEFCONFIG | tee -a "$LOG_FILE"
 
 ARGS="
 CC=clang
@@ -89,10 +88,10 @@ fi
 echo -e "\nKernel compiled successfully for $DEFCONFIG! Zipping up...\n" | tee -a "$LOG_FILE"
 
 if [ -d "$AK3_DIR" ]; then
-    cp -r $AK3_DIR AnyKernel3
+    cp -r "$AK3_DIR" AnyKernel3
     git -C AnyKernel3 checkout bangkk &> /dev/null
 else
-    git clone -q https://github.com/MrEliteBall/AnyKernel3 -b bangkk
+    git clone -q https://github.com/SashimiKernel/AnyKernel3 -b bangkk
 fi
 
 cp out/.config AnyKernel3/config
