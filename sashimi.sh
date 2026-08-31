@@ -61,27 +61,27 @@ echo -e "\nCompiling for $DEFCONFIG with variant $VARIANT..." | tee -a "$LOG_FIL
 
 mkdir -p out
 
-ARGS="
-CC=${CC_COMPILER}
-LD=${LLVM_DIR}/ld.lld
-ARCH=arm64
-AR=${LLVM_DIR}/llvm-ar
-NM=${LLVM_DIR}/llvm-nm
-AS=${LLVM_DIR}/llvm-as
-OBJCOPY=${LLVM_DIR}/llvm-objcopy
-OBJDUMP=${LLVM_DIR}/llvm-objdump
-READELF=${LLVM_DIR}/llvm-readelf
-OBJSIZE=${LLVM_DIR}/llvm-size
-STRIP=${LLVM_DIR}/llvm-strip
-LLVM_AR=${LLVM_DIR}/llvm-ar
-LLVM_DIS=${LLVM_DIR}/llvm-dis
-LLVM_NM=${LLVM_DIR}/llvm-nm
-LLVM=1
-KCFLAGS=-Wno-implicit-enum-enum-cast
-"
+ARGS=(
+    CC="${CC_COMPILER}"
+    LD="${LLVM_DIR}/ld.lld"
+    ARCH=arm64
+    AR="${LLVM_DIR}/llvm-ar"
+    NM="${LLVM_DIR}/llvm-nm"
+    AS="${LLVM_DIR}/llvm-as"
+    OBJCOPY="${LLVM_DIR}/llvm-objcopy"
+    OBJDUMP="${LLVM_DIR}/llvm-objdump"
+    READELF="${LLVM_DIR}/llvm-readelf"
+    OBJSIZE="${LLVM_DIR}/llvm-size"
+    STRIP="${LLVM_DIR}/llvm-strip"
+    LLVM_AR="${LLVM_DIR}/llvm-ar"
+    LLVM_DIS="${LLVM_DIR}/llvm-dis"
+    LLVM_NM="${LLVM_DIR}/llvm-nm"
+    LLVM=1
+    KCFLAGS="-Wno-implicit-enum-enum-cast"
+)
 
-make ${ARGS} O=out $DEFCONFIG moto.config | tee -a "$LOG_FILE"
-make ${ARGS} O=out -j$(nproc --all) | tee -a "$LOG_FILE"
+make "${ARGS[@]}" O=out $DEFCONFIG moto.config | tee -a "$LOG_FILE"
+make "${ARGS[@]}" O=out -j$(nproc --all) | tee -a "$LOG_FILE"
 
 if [ ! -e "out/arch/arm64/boot/Image" ]; then
     echo "ERROR: Image binary not found. Compilation failed!" | tee -a "$LOG_FILE"
